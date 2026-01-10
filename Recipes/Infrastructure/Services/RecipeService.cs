@@ -40,10 +40,11 @@ public class RecipeService : IRecipeService
         return _mapper.Map<RecipeReadDto>(recipe);
     }
 
-    public async Task<RecipeReadDto> CreateRecipeAsync(RecipeCreateDto recipeCreateDto)
+    public async Task<RecipeReadDto> CreateRecipeAsync(RecipeCreateDto recipeCreateDto, int userId)
     {
         //TO DO:se debe mappear tambien Catergories
         var recipeEntity = _mapper.Map<Recipe>(recipeCreateDto);
+        recipeEntity.UserId = userId;
 
         _context.Recipes.Add(recipeEntity);
         await _context.SaveChangesAsync();

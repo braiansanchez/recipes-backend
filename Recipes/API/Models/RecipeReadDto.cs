@@ -7,4 +7,5 @@ public class RecipeReadDto
     public string Description { get; set; } = string.Empty;
     public List<IngredientDto> Ingredients { get; set; } = new();
     public string? ImageUrl { get; set; }
+    public int UserId { get; set; }
 }

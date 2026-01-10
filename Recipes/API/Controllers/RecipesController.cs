@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Recipes.API.Models;
 using Recipes.Core.Entities;
 using Recipes.Infrastructure.Interfaces;
+using System.Security.Claims;
 
 namespace Recipes.API.Controllers;
 
@@ -36,9 +37,17 @@ public class RecipesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult<RecipeReadDto>> Create(RecipeCreateDto recipeCreateDto)
     {
-        var result = await _recipeService.CreateRecipeAsync(recipeCreateDto);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+        if (userIdClaim == null) 
+            return Unauthorized("Usuario no identificado");
+
+        int userId = int.Parse(userIdClaim.Value);
+
+        var result = await _recipeService.CreateRecipeAsync(recipeCreateDto, userId);
 
         // Devuelve un estado 201 y la URL para consultar el nuevo recurso
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);

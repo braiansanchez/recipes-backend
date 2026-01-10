@@ -49,19 +49,25 @@ public class AppDbContext : DbContext
         );
     }
 
-    public override int SaveChanges()
+    //Almacenar las fechas de created y updated automaticamente
+    public override int SaveChanges() => SaveChangesAsync().GetAwaiter().GetResult();
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var entries = ChangeTracker.Entries()
             .Where(e => e.Entity is Recipe && (e.State == EntityState.Added || e.State == EntityState.Modified));
 
         foreach (var entry in entries)
         {
-            ((Recipe)entry.Entity).UpdatedAt = DateTime.UtcNow;
+            var entity = (Recipe)entry.Entity;
+            entity.UpdatedAt = DateTime.UtcNow;
+
             if (entry.State == EntityState.Added)
             {
-                ((Recipe)entry.Entity).CreatedAt = DateTime.UtcNow;
+                entity.CreatedAt = DateTime.UtcNow;
             }
         }
-        return base.SaveChanges();
+
+        return await base.SaveChangesAsync(cancellationToken);
     }
 }

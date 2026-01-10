@@ -22,8 +22,12 @@ public class AuthService : IAuthService
         _config = config;
     }
 
-    public async Task<string> RegisterAsync(UserRegisterDto dto)
+    public async Task<string> RegisterAsync(UserRegisterDto dto, string adminCode)
     {
+        var secretFromConfig = _config["AdminSettings:RegistrationCode"];
+        if (adminCode != secretFromConfig)
+            throw new Exception("Código de invitación inválido.");
+
         if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
             throw new Exception("El email ya está registrado");
 
@@ -43,8 +47,18 @@ public class AuthService : IAuthService
     public async Task<string> LoginAsync(LoginDto dto)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-        if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+
+        if (user == null)
+            throw new Exception("Usuario no encontrado");
+
+        if (string.IsNullOrEmpty(user.PasswordHash))
+            throw new Exception("Esta cuenta utiliza Google. Por favor, inicia sesión con el botón de Google.");
+
+        if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             throw new Exception("Credenciales incorrectas");
+
+        if (!user.IsActive || user.IsDeleted)
+            throw new Exception("Cuenta desactivada o eliminada.");
 
         return GenerateJwtToken(user);
     }
@@ -84,7 +98,6 @@ public class AuthService : IAuthService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    //PENDING
     public async Task<AuthResponseDto> GoogleLoginAsync(string googleToken)
     {
         try
@@ -105,7 +118,10 @@ public class AuthService : IAuthService
                 {
                     Email = payload.Email,
                     Username = payload.Name,
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString())
+                    PasswordHash = null,
+                    IsActive = true,
+                    Role = "User",
+                    CreatedAt = DateTime.UtcNow,
                 };
 
                 _context.Users.Add(user);
@@ -126,6 +142,25 @@ public class AuthService : IAuthService
         catch (Exception ex)
         {
             throw new Exception("Error en la autenticación con Google: " + ex.Message);
+        }
+    }
+
+    public async Task<bool> SoftDeleteUserAsync(int userId)
+    {
+        try
+        {
+            var user = await _context.Users.FindAsync(userId);
+
+            if (user == null || user.IsDeleted)
+                return false;
+
+            user.IsDeleted = true;
+
+            return await _context.SaveChangesAsync() > 0;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error interno al intentar eliminar la cuenta.");
         }
     }
 }

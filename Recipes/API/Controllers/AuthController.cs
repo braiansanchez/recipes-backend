@@ -1,19 +1,14 @@
-﻿using Google.Apis.Auth;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Recipes.API.Models;
-using Recipes.Core.Entities;
-using Recipes.Infrastructure.Data;
 using Recipes.Infrastructure.Interfaces;
-using Recipes.Infrastructure.Services;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 
 namespace Recipes.API.Controllers;
 
+[ApiController]
+[Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
@@ -24,11 +19,11 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(UserRegisterDto dto)
+    public async Task<IActionResult> Register(UserRegisterDto dto, [FromQuery] string adminCode)
     {
         try
         {
-            var token = await _authService.RegisterAsync(dto);
+            var token = await _authService.RegisterAsync(dto, adminCode);
             return Ok(new { token });
         }
         catch (Exception ex)
@@ -52,7 +47,7 @@ public class AuthController : ControllerBase
     }
 
     [Authorize]
-    [HttpPut("update-profile")]
+    [HttpPut("update")]
     public async Task<IActionResult> Update(UserUpdateDto dto)
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -77,6 +72,20 @@ public class AuthController : ControllerBase
         {
             return Unauthorized(new { message = ex.Message });
         }
+    }
+
+    [Authorize]
+    [HttpDelete("me")]
+    public async Task<IActionResult> DeleteMe()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null) 
+            return Unauthorized();
+
+        var userId = int.Parse(userIdClaim.Value);
+
+        var success = await _authService.SoftDeleteUserAsync(userId);
+        return success ? Ok() : BadRequest();
     }
 }
 

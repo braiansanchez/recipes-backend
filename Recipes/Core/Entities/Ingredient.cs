@@ -1,5 +1,8 @@
-﻿namespace Recipes.Core.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
+namespace Recipes.Core.Entities;
+
+[Table("Ingredients")]
 public class Ingredient
 {
     public int Id { get; set; }

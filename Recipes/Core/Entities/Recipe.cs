@@ -1,5 +1,8 @@
-﻿namespace Recipes.Core.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
+namespace Recipes.Core.Entities;
+
+[Table("Recipes")]
 public class Recipe
 {
     public int Id { get; set; }
@@ -19,6 +22,5 @@ public class Recipe
     public int? UserId { get; set; }
     public User? User { get; set; }
 
-    public int? CategoryId { get; set; }
-    public Category? Category { get; set; }
+    public List<Category> Categories { get; set; } = new();
 }

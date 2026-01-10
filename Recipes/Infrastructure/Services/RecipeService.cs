@@ -21,7 +21,9 @@ public class RecipeService : IRecipeService
     public async Task<IEnumerable<RecipeReadDto>> GetAllRecipesAsync()
     {
         var recipes = await _context.Recipes
+            .Include(r => r.Categories)
             .Include(r => r.Ingredients)
+            .Include(r => r.User)
             .ToListAsync();
 
         return _mapper.Map<IEnumerable<RecipeReadDto>>(recipes);
@@ -30,7 +32,9 @@ public class RecipeService : IRecipeService
     public async Task<RecipeReadDto?> GetRecipeByIdAsync(int id)
     {
         var recipe = await _context.Recipes
+            .Include(r => r.Categories)
             .Include(r => r.Ingredients)
+            .Include(r => r.User)
             .FirstOrDefaultAsync(r => r.Id == id);
 
         return _mapper.Map<RecipeReadDto>(recipe);
@@ -38,6 +42,7 @@ public class RecipeService : IRecipeService
 
     public async Task<RecipeReadDto> CreateRecipeAsync(RecipeCreateDto recipeCreateDto)
     {
+        //TO DO:se debe mappear tambien Catergories
         var recipeEntity = _mapper.Map<Recipe>(recipeCreateDto);
 
         _context.Recipes.Add(recipeEntity);
@@ -48,6 +53,7 @@ public class RecipeService : IRecipeService
 
     public async Task<RecipeReadDto?> UpdateRecipeAsync(int id, RecipeUpdateDto recipeUpdateDto)
     {
+        //TO DO:se debe mappear tambien Catergories
         var recipe = await _context.Recipes
             .Include(r => r.Ingredients)
             .FirstOrDefaultAsync(r => r.Id == id);

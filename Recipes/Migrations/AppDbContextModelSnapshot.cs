@@ -2,23 +2,35 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Recipes.Infrastructure.Data;
 
 #nullable disable
 
-namespace Recipes.Infrastructure.Migrations
+namespace Recipes.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251231135410_AddUserAndCategoryRelationships")]
-    partial class AddUserAndCategoryRelationships
+    partial class AppDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
+
+            modelBuilder.Entity("CategoryRecipe", b =>
+                {
+                    b.Property<int>("CategoriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RecipesId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("CategoriesId", "RecipesId");
+
+                    b.HasIndex("RecipesId");
+
+                    b.ToTable("CategoryRecipe");
+                });
 
             modelBuilder.Entity("Recipes.Core.Entities.Category", b =>
                 {
@@ -102,9 +114,6 @@ namespace Recipes.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("CategoryId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("CookingTimeMinutes")
                         .HasColumnType("INTEGER");
 
@@ -144,8 +153,6 @@ namespace Recipes.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
-
                     b.HasIndex("UserId");
 
                     b.ToTable("Recipes");
@@ -155,7 +162,7 @@ namespace Recipes.Infrastructure.Migrations
                         {
                             Id = 1,
                             CookingTimeMinutes = 45,
-                            CreatedAt = new DateTime(2025, 12, 31, 13, 54, 9, 513, DateTimeKind.Utc).AddTicks(1490),
+                            CreatedAt = new DateTime(2026, 1, 10, 14, 31, 48, 442, DateTimeKind.Utc).AddTicks(6082),
                             Description = "Clásico mexicano",
                             Difficulty = "Media",
                             ImageUrl = "https://theeburgerdude.com/wp-content/uploads/2024/11/Al-Pastor-01-1024x1024.jpg",
@@ -168,7 +175,7 @@ namespace Recipes.Infrastructure.Migrations
                         {
                             Id = 2,
                             CookingTimeMinutes = 20,
-                            CreatedAt = new DateTime(2025, 12, 31, 13, 54, 9, 513, DateTimeKind.Utc).AddTicks(1527),
+                            CreatedAt = new DateTime(2026, 1, 10, 14, 31, 48, 442, DateTimeKind.Utc).AddTicks(6118),
                             Description = "Receta original italiana",
                             Difficulty = "Media",
                             ImageUrl = "https://www.informacibo.it/wp-content/uploads/2018/04/carbonara.jpg",
@@ -185,11 +192,26 @@ namespace Recipes.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("LastLogin")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("PasswordHash")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -199,7 +221,22 @@ namespace Recipes.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("User");
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("CategoryRecipe", b =>
+                {
+                    b.HasOne("Recipes.Core.Entities.Category", null)
+                        .WithMany()
+                        .HasForeignKey("CategoriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Recipes.Core.Entities.Recipe", null)
+                        .WithMany()
+                        .HasForeignKey("RecipesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Recipes.Core.Entities.Ingredient", b =>
@@ -215,22 +252,11 @@ namespace Recipes.Infrastructure.Migrations
 
             modelBuilder.Entity("Recipes.Core.Entities.Recipe", b =>
                 {
-                    b.HasOne("Recipes.Core.Entities.Category", "Category")
-                        .WithMany("Recipes")
-                        .HasForeignKey("CategoryId");
-
                     b.HasOne("Recipes.Core.Entities.User", "User")
                         .WithMany("Recipes")
                         .HasForeignKey("UserId");
 
-                    b.Navigation("Category");
-
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Recipes.Core.Entities.Category", b =>
-                {
-                    b.Navigation("Recipes");
                 });
 
             modelBuilder.Entity("Recipes.Core.Entities.Recipe", b =>

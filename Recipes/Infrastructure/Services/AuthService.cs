@@ -132,7 +132,8 @@ public class AuthService : IAuthService
             {
                 Token = GenerateJwtToken(user),
                 UserId = user.Id,
-                Username = user.Username
+                Username = user.Username,
+                Email = user.Email
             };
         }
         catch (InvalidJwtException)

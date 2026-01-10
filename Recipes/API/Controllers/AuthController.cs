@@ -59,12 +59,12 @@ public class AuthController : ControllerBase
     [HttpPost("google-login")]
     public async Task<IActionResult> GoogleLogin([FromBody] GoogleRequestDto request)
     {
-        if (string.IsNullOrEmpty(request.IdToken))
+        if (string.IsNullOrEmpty(request.googleToken))
             return BadRequest("El token de Google es requerido.");
 
         try
         {
-            var authResponse = await _authService.GoogleLoginAsync(request.IdToken);
+            var authResponse = await _authService.GoogleLoginAsync(request.googleToken);
 
             return Ok(authResponse);
         }

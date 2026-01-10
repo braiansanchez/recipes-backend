@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Recipes.API.Models;
 using Recipes.Core.Entities;
 using Recipes.Infrastructure.Interfaces;
@@ -17,6 +18,7 @@ public class RecipesController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<Recipe>>> GetAll()
     {
         return Ok(await _recipeService.GetAllRecipesAsync());

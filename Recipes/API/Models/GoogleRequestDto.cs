@@ -2,5 +2,5 @@
 
 public class GoogleRequestDto
 {
-    public string IdToken { get; set; } = string.Empty;
+    public string googleToken { get; set; } = string.Empty;
 }

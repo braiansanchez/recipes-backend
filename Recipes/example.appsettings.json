@@ -1,0 +1,20 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "Jwt": {
+    "Key": "JWT_KEY",
+    "Issuer": "SaborACasaAPI",
+    "Audience": "SaborACasaReact"
+  },
+  "Google": {
+    "ClientId": "CLIENT_ID_GOOGLE"
+  },
+  "AdminSettings": {
+    "RegistrationCode": "CODIGO_PARA_AMIGOS"
+  }
+}
